@@ -101,13 +101,13 @@ else :
             assert(partFrom in Body_joints) 
             assert(partTo in Body_joints)
 
-        idFrom = Body_joints[partFrom]
-        idTo = Body_joints[partTo]
+            idFrom = Body_joints[partFrom]
+            idTo = Body_joints[partTo]
 
-        if body_points[idFrom] and body_points[idTo]:
-            cv.line(frame1, body_points[idFrom], body_points[idTo], (0, 255, 0), 3)
-            cv.ellipse(frame1, body_points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
-            cv.ellipse(frame1, body_points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
+            if body_points[idFrom] and body_points[idTo]:
+                cv.line(frame1, body_points[idFrom], body_points[idTo], (0, 255, 0), 3)
+                cv.ellipse(frame1, body_points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
+                cv.ellipse(frame1, body_points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 
 
         cv.imshow('POSE DETECTION', frame1)
