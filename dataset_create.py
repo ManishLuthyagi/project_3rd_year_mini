@@ -1,48 +1,42 @@
 # -*- coding: utf-8 -*-
 """
 program for creating a dataset for program
-
 Created on Thu Apr 18 22:20:05 2019
-
 @author: manishluthyagi
 """
 
-import cv2
-import os
+import cv2 as cv
+import os as dire
 
-classifier = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-video_capture = cv2.VideoCapture(0)
-image_count = 0
+casc_classifier = cv.CascadeClassifier(cv.data.haarcascades + "haarcascade_frontalface_default.xml")
+capture_frame = cv.VideoCapture(0)
+count_no = 0
 person_name = input("\n Person name in Video stream :\t >")
 
-os.mkdir("dataset/"+person_name)
+dire.mkdir("train/"+person_name)
+dire.mkdir("test/"+person_name)
 while True:
     
-    ret, frame = video_capture.read()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    B_value ,frame_img = capture_frame.read()
+    gray_img = cv.cvtColor(frame_img, cv.COLOR_BGR2GRAY)
 
-    faces = classifier.detectMultiScale(
-        gray,
-        scaleFactor = 1.1,
-        minNeighbors = 5,
-        minSize = (30, 30),
-        flags = cv2.CASCADE_SCALE_IMAGE
-    )
+    face_set = casc_classifier.detectMultiScale(gray_img, scaleFactor = 1.1, minNeighbors = 5, minSize = (30, 30), flags = cv.CASCADE_SCALE_IMAGE )
     
-
-    # Drawing a rectangle around the faces
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 1)
+    for (x1, y1, x2, y2) in face_set:
+        cv.rectangle(frame_img, (x1, y1), (x1+x2, y1+y2), (0, 255, 255), 1)
         
-    # Display the resulting frame
-    cv2.imwrite("dataset/"+person_name+'/'+str(image_count)+ ".jpg", frame[ y:y+h, x:x+w])
-    cv2.imshow(person_name,frame)
-    image_count = image_count + 1
-    if image_count > 200:
+    if count_no < 250:
+        cv.imwrite("train/"+person_name+'/'+str(count_no)+ ".jpg", frame_img)
+    else:
+       cv.imwrite("test/"+person_name+'/'+str(count_no)+ ".jpg", frame_img)
+        
+    cv.imshow(person_name,frame_img)
+    count_no = count_no + 1
+    if count_no > 350:
         break
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv.waitKey(1) & 0xFF == ord('q'):
         break
 
 # When everything is done, release the capture
-video_capture.release()
-cv2.destroyAllWindows()
+capture_frame.release()
+cv.destroyAllWindows()
