@@ -83,35 +83,35 @@ else :
         out_data = out_data[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
         
         assert(len(Body_joints) == out_data.shape[1])
-        points = []
+        body_points = []
         
-        for i in range(len(Body_joints)):
+        for j in range(len(Body_joints)):
          
-            heatMap = out_data[0, i, :, :]
+            body_map = out_data[0, j, :, :]
             
-            _, conf, _, point = cv.minMaxLoc(heatMap)
-            x = (frameWidth * point[0]) / out_data.shape[3]
-            y = (frameHeight * point[1]) / out_data.shape[2]
+            _, cnf, _, pnt = cv.minMaxLoc(body_map)
+            x = (frameWidth * pnt[0]) / out_data.shape[3]
+            y = (frameHeight * pnt[1]) / out_data.shape[2]
             # Add a point if it's confidence is higher than threshold.
-            points.append((int(x), int(y)) if conf > 0.25 else None)
+            body_points.append((int(x), int(y)) if cnf > 0.25 else None)
 
-        for pair in joints_pairs:
-            partFrom = pair[0]
-            partTo = pair[1]
+        for pairs in joints_pairs:
+            partFrom = pairs[0]
+            partTo = pairs[1]
             assert(partFrom in Body_joints) 
             assert(partTo in Body_joints)
 
         idFrom = Body_joints[partFrom]
         idTo = Body_joints[partTo]
 
-        if points[idFrom] and points[idTo]:
-            cv.line(frame1, points[idFrom], points[idTo], (0, 255, 0), 3)
-            cv.ellipse(frame1, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
-            cv.ellipse(frame1, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
+        if body_points[idFrom] and body_points[idTo]:
+            cv.line(frame1, body_points[idFrom], body_points[idTo], (0, 255, 0), 3)
+            cv.ellipse(frame1, body_points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
+            cv.ellipse(frame1, body_points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 
 
-        t, _ = model_TP.getPerfProfile()
-        freq = cv.getTickFrequency() / 1000
+        #t, _ = model_TP.getPerfProfile()
+        #freq = cv.getTickFrequency() / 1000
         cv.imshow('POSE DETECTION', frame1)
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
