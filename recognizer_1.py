@@ -31,7 +31,7 @@ if category == "FACE RECOGNITION":
         face_set = casc_classifier.detectMultiScale( img_gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE )
     
         for (x1, y1, x2, y2) in face_set:
-            cv.rectangle(img_input, (x1, y1), (x1+x2, y1+y2), (0, 255, 255), 1)
+            cv.rectangle(img_input, (x1, y1), (x1+x2, y1+y2), (255, 250, 250), 1)
     
             img_resized = cv.resize(img_input, (64,64))
             img_array = img.img_to_array(img_resized)
@@ -42,7 +42,7 @@ if category == "FACE RECOGNITION":
             else :
                 person_name = 'manish'
     
-            cv.putText(img_input, person_name, (x1, y1), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 255), 2)
+            cv.putText(img_input, person_name, (x1, y1), cv.FONT_HERSHEY_SIMPLEX, 0.45, (245, 245, 245), 2)
     
         # Display the resulting frame
             cv.imshow('FACE RECOGNITION', img_input)
