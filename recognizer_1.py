@@ -7,27 +7,25 @@ Created on Thu Apr 18 22:20:05 2019
 import cv2 as cv
 import pickle as pckl
 import numpy as nmpy
-from keras.preprocessing import img
+from keras.preprocessing import image as img
 import timeit 
-
 
 
 print("\n\tCHOOSE YOUR OPTION \n\n 1.)\tPOSE DETECTION \n 2.)\tFACE RECOGNITION " )
 category = input().upper()
 
-if category == "Face RECOGNITION":
-    while True:
+if category == "FACE RECOGNITION":
     
-        file_model = open('classifier1.pickle','rb')
-        cnn_model = pckl.loads(file_model.read())
-        file_model.close()
+    file_model = open('classifier1.pickle','rb')
+    cnn_model = pckl.loads(file_model.read())
+    file_model.close()
+    casc_classifier = cv.CascadeClassifier(cv.data.haarcascades + "haarcascade_frontalface_default.xml")
+    captured_frame = cv.VideoCapture(0)
        
-        Casc_classifier = cv.CascadeClassifier(cv.data.haarcascades + "haarcascade_frontalface_default.xml")
+    while True:
         
-        captured_frame = cv.VideoCapture(0)
-    
         bool_val, img_input = captured_frame.read()
-        
+    
         img_gray = cv.cvtColor(img_input, cv.COLOR_BGR2GRAY)
          
         face_set = casc_classifier.detectMultiScale( img_gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv.CASCADE_SCALE_IMAGE )
@@ -35,25 +33,25 @@ if category == "Face RECOGNITION":
         for (x1, y1, x2, y2) in face_set:
             cv.rectangle(img_input, (x1, y1), (x1+x2, y1+y2), (0, 255, 255), 1)
     
-            img_resized = cv.resize(frame,(64,64))
+            img_resized = cv.resize(img_input, (64,64))
             img_array = img.img_to_array(img_resized)
-            img_array = np.expand_dims(img_array, axis = 0)
+            img_array = nmpy.expand_dims(img_array, axis = 0)
             predict_name = cnn_model.predict(img_array)
-            if predict[0][0] >= 0.5:
+            if predict_name[0][0] >= 0.5:
                 person_name = 'udit'
-            else predict[0][0] < 0.5:
+            else :
                 person_name = 'manish'
     
-            cv.putText(img_input, , (x, y), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 255), 2)
+            cv.putText(img_input, person_name, (x1, y1), cv.FONT_HERSHEY_SIMPLEX, 0.45, (255, 0, 255), 2)
     
         # Display the resulting frame
-        cv.imshow('FACE RECOGNITION', img_input)
+            cv.imshow('FACE RECOGNITION', img_input)
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
 
     
     
-else category == "POSE DETECTION:
+else :
     model_TP = cv.dnn.readNetFromTensorflow("tensor_pose.pb")
     Body_joints = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -70,18 +68,18 @@ else category == "POSE DETECTION:
     Width = 368
     Height = 368
 
-    frame_capture = cv.VideoCapture(0)
+    captured_frame = cv.VideoCapture(0)
 
     while True:
 
-        bool_val, frame1 = frame_capture.read()
+        bool_val, frame1 = captured_frame.read()
         
         frameWidth = frame1.shape[1]
         frameHeight = frame1.shape[0]
         
         model_TP.setInput(cv.dnn.blobFromImage(frame1, 1.0, (Width, Height), (127.5, 127.5, 127.5), swapRB=True, crop=False))
         
-        out_data = model.forward()
+        out_data = model_TP.forward()
         out_data = out_data[:, :19, :, :]  # MobileNet output [1, 57, -1, -1], we only need the first 19 elements
         
         assert(len(Body_joints) == out_data.shape[1])
@@ -89,13 +87,13 @@ else category == "POSE DETECTION:
         
         for i in range(len(Body_joints)):
          
-            heatMap = out[0, i, :, :]
+            heatMap = out_data[0, i, :, :]
             
-         _, conf, _, point = cv.minMaxLoc(heatMap)
-        x = (frameWidth * point[0]) / out.shape[3]
-        y = (frameHeight * point[1]) / out.shape[2]
-        # Add a point if it's confidence is higher than threshold.
-        points.append((int(x), int(y)) if conf > 0.25 else None)
+            _, conf, _, point = cv.minMaxLoc(heatMap)
+            x = (frameWidth * point[0]) / out_data.shape[3]
+            y = (frameHeight * point[1]) / out_data.shape[2]
+            # Add a point if it's confidence is higher than threshold.
+            points.append((int(x), int(y)) if conf > 0.25 else None)
 
         for pair in joints_pairs:
             partFrom = pair[0]
@@ -112,7 +110,7 @@ else category == "POSE DETECTION:
             cv.ellipse(frame1, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 
 
-        t, _ = model.getPerfProfile()
+        t, _ = model_TP.getPerfProfile()
         freq = cv.getTickFrequency() / 1000
         cv.imshow('POSE DETECTION', frame1)
         if cv.waitKey(1) & 0xFF == ord('q'):
@@ -120,5 +118,5 @@ else category == "POSE DETECTION:
 
 # When everything is done, release the capture
 
-frame_capture.release()
+captured_frame.release()
 cv.destroyAllWindows()
