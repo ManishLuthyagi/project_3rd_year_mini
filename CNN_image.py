@@ -5,83 +5,92 @@ Spyder Editor
 manish luthyagi
 """
 
-# importing the libraries 
-from keras.models import Sequential
-from keras.layers import Convolution2D
-from keras.layers import MaxPooling2D
-from keras.layers import Flatten
-from keras.layers import Dense
-import pickle
+# importing the libraries
+from keras.models import Sequential as sequ
+from keras.layers import Convolution2D as conv
+from keras.layers import MaxPool2D as maxp
+from keras.layers import Flatten as Fltn
+from keras.layers import Dense as Dns
+from keras.layers.core import Dropout as drp
+from keras.layers.core import Activation as actv
+from keras.layers.normalization import BatchNormalization as btchnrm
+
+import pickle as pckl
 
 
 #initialize the cnn
-classifier = Sequential()
+model_cnn = sequ()
+inputshape = (64 ,64, 3)
 
- # convolution
-classifier.add(Convolution2D(32, 3, 3, input_shape = (64 ,64, 3),activation = 'relu'))
+# convolution
+model_cnn.add(conv(32, (3, 3), padding="same", input_shape=(64,64,3)))
+model_cnn.add(actv("relu"))
+model_cnn.add(btchnrm(axis= -1))
+model_cnn.add(maxp(pool_size=(3, 3)))
+model_cnn.add(drp(0.25))
+
+model_cnn.add(conv(64, (3, 3), padding="same"))
+model_cnn.add(actv("relu"))
+model_cnn.add(btchnrm(axis= -1 ))
+model_cnn.add(conv(64, (3, 3), padding="same"))
+model_cnn.add(actv("relu"))
+model_cnn.add(btchnrm(axis= -1))
+model_cnn.add(maxp(pool_size=(2, 2)))
+model_cnn.add(drp(0.25))
 
  # pooling
-classifier.add(MaxPooling2D(pool_size = (2,2)))
+model_cnn.add(maxp(pool_size = (2,2)))
 
  # Flattening
-classifier.add(Flatten())
+model_cnn.add(Fltn())
 
  # Full connection
-classifier.add(Dense(output_dim = 128, activation = 'relu'))
-classifier.add(Dense(output_dim = 1, activation = 'sigmoid'))
+model_cnn.add(Dns(output_dim = 128, actv = 'relu'))
+model_cnn.add(Dns(output_dim = 1, actv = 'sigmoid'))
 
 #compiling the cnn
-classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics=['accuracy'])
+model_cnn.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics=['accuracy'])
 
-#part2- fitting the cnn to the images
+#part2- fitting the cnn to the imgs
 
-from keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.img import imgDataGenerator as imgDG
 
-train_datagen = ImageDataGenerator( rescale=1./255,shear_range=0.2,zoom_range=0.2,horizontal_flip=True)
-test_datagen = ImageDataGenerator(rescale=1./255)
+train_datagen_set = imgDG( rescale=1./255,shear_range=0.2,zoom_range=0.2,horizontal_flip=True)
+test_datagen_set = imgDG(rescale=1./255)
 
-training_set = train_datagen.flow_from_directory('train' ,target_size=(64,64),batch_size=32,class_mode='binary')
-test_set = test_datagen.flow_from_directory('test', target_size=(64,64),batch_size=32,class_mode='binary')
+training_data = train_datagen_set.flow_from_directory('train' ,target_size=(64,64),batch_size=32,class_mode='binary')
+test_data = test_datagen_set.flow_from_directory('test', target_size=(64,64),batch_size=32,class_mode='binary')
 
-#training our network
+model_cnn.fit_generator(training_data, steps_per_epoch = 80, epochs = 10, validation_data= test_data, validation_steps= 800)
 
-#from ipython.display import display
-from PIL import Image
+# Dont run
+file_model = open('new_model_cnn.pickle','wb')
+file_model.write(pckl.dumps(model_cnn))
+file_model.close()
 
-classifier.fit_generator(training_set, steps_per_epoch = 80, epochs = 10, validation_data=test_set, validation_steps= 800)
-
-f = open('classifier1.pickle','wb')
-f.write(pickle.dumps(classifier))
-f.close()
-
-
-# Testing 
-import numpy as np
-from keras.preprocessing import image
+# Testing
+import numpy as nmpy
+from keras.preprocessing import img as img
 import timeit
 
 
 x = timeit.timeit()
-test_image = image.load_img('udit.jpg',target_size =(64,64))
-test_image = image.img_to_array(test_image)
-test_image = np.expand_dims(test_image,axis = 0)
-result = classifier.predict(test_image)
+load_img = img.load_img('manish1.jpg',target_size =(64,64))
+img_array = img.img_to_array(load_img)
+img_array = nmpy.expand_dims(img_array,axis = 0)
+person_name = model_cnn.predict(img_array)
 
-#training_set.class_indices
-y = timeit.timeit()1
+y = timeit.timeit()
+
 print(x-y)
 
 
-if result[0][0] >= 0.5:
-    prediction ='udit'
-    
-if result[0][0]<=0.5:
-    prediction ='manish'
+if person_name[0][0] >= 0.5:
+    predict_name ='udit'
 
-print(prediction)
+if person_name[0][0]<=0.5:
+    predict_name ='manish'
+
+print(predict_name)
 
 
-v = cv2.VideoCapture(0)
-_, frame = v.read()
-cv2.imwrite('helo1.jpg',frame)
-v.release()
