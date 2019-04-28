@@ -110,13 +110,9 @@ else :
             cv.ellipse(frame1, body_points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv.FILLED)
 
 
-        #t, _ = model_TP.getPerfProfile()
-        #freq = cv.getTickFrequency() / 1000
         cv.imshow('POSE DETECTION', frame1)
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
-
-# When everything is done, release the capture
 
 captured_frame.release()
 cv.destroyAllWindows()
