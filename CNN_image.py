@@ -20,7 +20,7 @@ import pickle as pckl
 
 #initialize the cnn
 model_cnn = sequ()
-inputshape = (64 ,64, 3)
+
 
 # convolution
 model_cnn.add(conv(32, (3, 3), padding="same", input_shape=(64,64,3)))
@@ -68,29 +68,7 @@ file_model = open('new_model_cnn.pickle','wb')
 file_model.write(pckl.dumps(model_cnn))
 file_model.close()
 
-# Testing
-import numpy as nmpy
-from keras.preprocessing import img as img
-import timeit
 
 
-x = timeit.timeit()
-load_img = img.load_img('manish1.jpg',target_size =(64,64))
-img_array = img.img_to_array(load_img)
-img_array = nmpy.expand_dims(img_array,axis = 0)
-person_name = model_cnn.predict(img_array)
-
-y = timeit.timeit()
-
-print(x-y)
-
-
-if person_name[0][0] >= 0.5:
-    predict_name ='udit'
-
-if person_name[0][0]<=0.5:
-    predict_name ='manish'
-
-print(predict_name)
 
 
